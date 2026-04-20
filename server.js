@@ -38,8 +38,8 @@ app.use(express.json());
    ---------------------------------------------------------- */
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,  // set this in Render.com or .env
-    // On Render.com, PostgreSQL requires SSL — this line enables it safely
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    // rejectUnauthorized: false allows self-signed certs (needed for Render.com)
+    ssl: { rejectUnauthorized: false }
 });
 
 

@@ -1,0 +1,8 @@
+# Never push node_modules — it's too large and gets reinstalled automatically
+node_modules/
+
+# Never push .env — it contains your database password and JWT secret!
+.env
+
+# Windows system file
+Thumbs.db

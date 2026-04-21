@@ -1,16 +1,9 @@
-/* ============================================================
+/*
    ACITY CONNECT — Main Backend Server
-   All routes are written in this ONE file so it is easy
-   for the examiner to read and follow the logic.
 
-   Stack: Node.js + Express + PostgreSQL + JWT + bcryptjs
-   Hosted on: Render.com
-   ============================================================ */
-
-
-/* ----------------------------------------------------------
+/* 
    STEP 1: Load required packages / libraries
-   ---------------------------------------------------------- */
+   */
 const express    = require('express');      // web server framework
 const cors       = require('cors');         // allow frontend to call this API
 const bcrypt     = require('bcryptjs');     // for hashing passwords securely
@@ -19,9 +12,9 @@ const { Pool }   = require('pg');          // for talking to PostgreSQL database
 require('dotenv').config();                 // load values from .env file
 
 
-/* ----------------------------------------------------------
-   STEP 2: Create the Express app
-   ---------------------------------------------------------- */
+    /* 
+    STEP 2: Create the Express app
+    */
 const app = express();
 
 // Allow requests from any origin (required when frontend & backend are separate)
@@ -31,11 +24,11 @@ app.use(cors());
 app.use(express.json());
 
 
-/* ----------------------------------------------------------
-   STEP 3: Connect to PostgreSQL database
-   We read connection details from environment variables
+/* 
+    STEP 3: Connect to PostgreSQL database
+    We read connection details from environment variables
    so we never write passwords in the code.
-   ---------------------------------------------------------- */
+   */
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,  // set this in Render.com or .env
     // rejectUnauthorized: false allows self-signed certs (needed for Render.com)
@@ -43,12 +36,12 @@ const pool = new Pool({
 });
 
 
-/* ----------------------------------------------------------
+/* 
    STEP 4: Middleware — Verify JWT Token
    This function checks if the user is logged in.
    It reads a token from the Authorization header,
    verifies it, and puts the user data on "req.user".
-   ---------------------------------------------------------- */
+   */
 function verifyToken(req, res, next) {
 
     // The header looks like: "Bearer eyJhbGciOiJIUzI1N..."
@@ -75,10 +68,10 @@ function verifyToken(req, res, next) {
 }
 
 
-/* ----------------------------------------------------------
+/* 
    STEP 5: Middleware — Check if user is an Admin
    This runs AFTER verifyToken. It checks the user's role.
-   ---------------------------------------------------------- */
+   */
 function isAdmin(req, res, next) {
     if (req.user.role !== 'admin') {
         return res.status(403).json({ error: 'Access denied. Admins only.' });
@@ -87,16 +80,16 @@ function isAdmin(req, res, next) {
 }
 
 
-/* ==========================================================
+/* 
    AUTH ROUTES — Registration and Login
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    POST /api/auth/register
    Creates a new student account.
    Validates that the email is an ACity email.
-   ---------------------------------------------------------- */
+   */
 app.post('/api/auth/register', async (req, res) => {
 
     // Get the data sent by the form
@@ -151,10 +144,10 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    POST /api/auth/login
    Logs in an existing user and returns a JWT token.
-   ---------------------------------------------------------- */
+   */
 app.post('/api/auth/login', async (req, res) => {
 
     const { email, password } = req.body;
@@ -208,16 +201,16 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    USER ROUTES — Profile
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/users/:id
    Get a user's profile information.
    Requires the user to be logged in (verifyToken).
-   ---------------------------------------------------------- */
+   */
 app.get('/api/users/:id', verifyToken, async (req, res) => {
 
     try {
@@ -239,11 +232,11 @@ app.get('/api/users/:id', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/users/:id
    Update a user's profile info.
    Users can only update THEIR OWN profile.
-   ---------------------------------------------------------- */
+   */
 app.put('/api/users/:id', verifyToken, async (req, res) => {
 
     // Make sure users can't edit someone else's profile
@@ -273,16 +266,16 @@ app.put('/api/users/:id', verifyToken, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    LISTING ROUTES — Marketplace Posts
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/listings
    Get all APPROVED listings. Supports search and filters.
    Public route — no login needed to browse.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/listings', async (req, res) => {
 
     // Get filter values from the URL query string
@@ -326,10 +319,10 @@ app.get('/api/listings', async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/listings/mine
    Get only the current user's listings (including unapproved).
-   ---------------------------------------------------------- */
+   */
 app.get('/api/listings/mine', verifyToken, async (req, res) => {
 
     try {
@@ -344,10 +337,10 @@ app.get('/api/listings/mine', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    POST /api/listings
    Create a new listing. Goes into "pending" until admin approves.
-   ---------------------------------------------------------- */
+   */
 app.post('/api/listings', verifyToken, async (req, res) => {
 
     const { title, description, category } = req.body;
@@ -379,10 +372,10 @@ app.post('/api/listings', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/listings/:id/status
    Update the status of YOUR OWN listing (available/swapped/sold).
-   ---------------------------------------------------------- */
+   */
 app.put('/api/listings/:id/status', verifyToken, async (req, res) => {
 
     const { status } = req.body;
@@ -411,10 +404,10 @@ app.put('/api/listings/:id/status', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    DELETE /api/listings/:id
    Delete YOUR OWN listing.
-   ---------------------------------------------------------- */
+   */
 app.delete('/api/listings/:id', verifyToken, async (req, res) => {
 
     try {
@@ -429,16 +422,16 @@ app.delete('/api/listings/:id', verifyToken, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    INTERACTION ROUTES — "Interested" Button
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    POST /api/interactions
    Express interest in a listing.
    Also sends a notification to the listing owner.
-   ---------------------------------------------------------- */
+   */
 app.post('/api/interactions', verifyToken, async (req, res) => {
 
     const { listing_id } = req.body;
@@ -485,10 +478,10 @@ app.post('/api/interactions', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/interactions/mine
    Get a list of listings the current user expressed interest in.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/interactions/mine', verifyToken, async (req, res) => {
 
     try {
@@ -507,15 +500,15 @@ app.get('/api/interactions/mine', verifyToken, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    NOTIFICATION ROUTES
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/notifications
    Get all notifications for the logged-in user.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/notifications', verifyToken, async (req, res) => {
 
     try {
@@ -530,10 +523,10 @@ app.get('/api/notifications', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/notifications/:id/read
    Mark a single notification as read.
-   ---------------------------------------------------------- */
+   */
 app.put('/api/notifications/:id/read', verifyToken, async (req, res) => {
 
     try {
@@ -548,15 +541,15 @@ app.put('/api/notifications/:id/read', verifyToken, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    MESSAGE ROUTES — Simple Direct Messaging
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    POST /api/messages
    Send a direct message to another user.
-   ---------------------------------------------------------- */
+   */
 app.post('/api/messages', verifyToken, async (req, res) => {
 
     const { to_user_id, body, listing_id } = req.body;
@@ -584,10 +577,10 @@ app.post('/api/messages', verifyToken, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/messages
    Get all messages sent TO the current user.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/messages', verifyToken, async (req, res) => {
 
     try {
@@ -606,16 +599,16 @@ app.get('/api/messages', verifyToken, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    ADMIN ROUTES — Moderate Listings & View Stats
    All routes here require verifyToken + isAdmin
-   ========================================================== */
+   */
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/admin/stats
    Returns overall platform numbers for the dashboard.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/admin/stats', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -645,10 +638,10 @@ app.get('/api/admin/stats', verifyToken, isAdmin, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/admin/listings
    Get ALL listings (including unapproved and flagged).
-   ---------------------------------------------------------- */
+   */
 app.get('/api/admin/listings', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -665,10 +658,10 @@ app.get('/api/admin/listings', verifyToken, isAdmin, async (req, res) => {
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/admin/listings/pending
    Get only the listings that need approval.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/admin/listings/pending', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -686,10 +679,10 @@ app.get('/api/admin/listings/pending', verifyToken, isAdmin, async (req, res) =>
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/admin/listings/:id/approve
    Admin approves a listing so it appears in the marketplace.
-   ---------------------------------------------------------- */
+   */
 app.put('/api/admin/listings/:id/approve', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -704,10 +697,10 @@ app.put('/api/admin/listings/:id/approve', verifyToken, isAdmin, async (req, res
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/admin/listings/:id/flag
    Admin flags inappropriate content (hides it from marketplace).
-   ---------------------------------------------------------- */
+   */
 app.put('/api/admin/listings/:id/flag', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -722,10 +715,10 @@ app.put('/api/admin/listings/:id/flag', verifyToken, isAdmin, async (req, res) =
 });
 
 
-/* ----------------------------------------------------------
+/* 
    DELETE /api/admin/listings/:id
    Admin permanently deletes any listing.
-   ---------------------------------------------------------- */
+   */
 app.delete('/api/admin/listings/:id', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -737,11 +730,11 @@ app.delete('/api/admin/listings/:id', verifyToken, isAdmin, async (req, res) => 
 });
 
 
-/* ----------------------------------------------------------
+/* 
    PUT /api/admin/listings/:id/edit
    Admin edits a listing's title, description and category.
    All three fields are optional — only send what changed.
-   ---------------------------------------------------------- */
+   */
 app.put('/api/admin/listings/:id/edit', verifyToken, isAdmin, async (req, res) => {
 
     const { title, description, category } = req.body;
@@ -767,10 +760,10 @@ app.put('/api/admin/listings/:id/edit', verifyToken, isAdmin, async (req, res) =
 });
 
 
-/* ----------------------------------------------------------
+/* 
    GET /api/admin/users
    Admin can view all registered users.
-   ---------------------------------------------------------- */
+   */
 app.get('/api/admin/users', verifyToken, isAdmin, async (req, res) => {
 
     try {
@@ -784,10 +777,10 @@ app.get('/api/admin/users', verifyToken, isAdmin, async (req, res) => {
 });
 
 
-/* ==========================================================
+/* 
    STEP 6: Start the server
    PORT comes from environment (Render.com sets this automatically)
-   ========================================================== */
+   */
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

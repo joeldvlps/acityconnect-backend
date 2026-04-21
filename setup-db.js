@@ -1,11 +1,11 @@
-/* ============================================================
+/*
    setup-db.js
    Run this file ONCE to create all the database tables.
    It connects to your Render PostgreSQL and runs the SQL.
 
    How to run:
        node setup-db.js
-   ============================================================ */
+*/
 
 const { Pool } = require('pg');   /* PostgreSQL library */
 require('dotenv').config();        /* loads DATABASE_URL from .env */

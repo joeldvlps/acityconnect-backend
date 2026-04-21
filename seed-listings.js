@@ -1,10 +1,3 @@
-/* ============================================================
-   seed-listings.js
-   Adds a few sample listings to the database so the
-   marketplace is not empty on first launch.
-
-   Run ONCE:  node seed-listings.js
-   ============================================================ */
 
 const { Pool } = require('pg');
 require('dotenv').config();

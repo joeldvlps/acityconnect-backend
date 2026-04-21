@@ -738,6 +738,36 @@ app.delete('/api/admin/listings/:id', verifyToken, isAdmin, async (req, res) => 
 
 
 /* ----------------------------------------------------------
+   PUT /api/admin/listings/:id/edit
+   Admin edits a listing's title, description and category.
+   All three fields are optional — only send what changed.
+   ---------------------------------------------------------- */
+app.put('/api/admin/listings/:id/edit', verifyToken, isAdmin, async (req, res) => {
+
+    const { title, description, category } = req.body;
+
+    /* At least one field must be provided */
+    if (!title && !description && !category) {
+        return res.status(400).json({ error: 'Provide at least one field to update.' });
+    }
+
+    try {
+        await pool.query(
+            `UPDATE listings
+             SET title       = COALESCE($1, title),
+                 description = COALESCE($2, description),
+                 category    = COALESCE($3, category)
+             WHERE id = $4`,
+            [title || null, description || null, category || null, req.params.id]
+        );
+        res.json({ message: 'Listing updated.' });
+    } catch (err) {
+        res.status(500).json({ error: 'Server error: ' + err.message });
+    }
+});
+
+
+/* ----------------------------------------------------------
    GET /api/admin/users
    Admin can view all registered users.
    ---------------------------------------------------------- */

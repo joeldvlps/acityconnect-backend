@@ -1,14 +1,9 @@
--- ============================================================
 -- ACITY CONNECT — Database Schema
--- Run this file in your PostgreSQL database FIRST
--- before starting the server.
--- ============================================================
 
 
--- -----------------------------------------------
+
 -- TABLE: users
 -- Stores all registered students and admins
--- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
     id          SERIAL PRIMARY KEY,           -- auto number for each user
     full_name   VARCHAR(100) NOT NULL,        -- student's full name
@@ -22,10 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 
--- -----------------------------------------------
 -- TABLE: listings
 -- Items for sale OR skills offered/requested
--- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS listings (
     id          SERIAL PRIMARY KEY,
     user_id     INT REFERENCES users(id) ON DELETE CASCADE, -- who posted it
@@ -39,10 +32,8 @@ CREATE TABLE IF NOT EXISTS listings (
 );
 
 
--- -----------------------------------------------
 -- TABLE: interactions
 -- When a user clicks "Interested" on a listing
--- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS interactions (
     id           SERIAL PRIMARY KEY,
     listing_id   INT REFERENCES listings(id) ON DELETE CASCADE,
@@ -53,10 +44,8 @@ CREATE TABLE IF NOT EXISTS interactions (
 );
 
 
--- -----------------------------------------------
 -- TABLE: notifications
 -- A simple message sent to a user (bell icon)
--- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS notifications (
     id         SERIAL PRIMARY KEY,
     user_id    INT REFERENCES users(id) ON DELETE CASCADE,  -- who receives it
@@ -66,10 +55,8 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 
--- -----------------------------------------------
 -- TABLE: messages
 -- Direct messages between users
--- -----------------------------------------------
 CREATE TABLE IF NOT EXISTS messages (
     id           SERIAL PRIMARY KEY,
     from_user_id INT REFERENCES users(id) ON DELETE CASCADE, -- sender
@@ -80,12 +67,10 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 
--- -----------------------------------------------
 -- SEED: Create a default admin account
 -- Email: admin@acity.edu.gh
 -- Password: admin123  (hashed below)
 -- Change this password after first login!
--- -----------------------------------------------
 INSERT INTO users (full_name, email, password, role)
 VALUES (
     'Admin User',
